@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-
     <script>
     (function() {
         document.addEventListener('contextmenu', function(e) {
@@ -47,17 +46,10 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
         body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
         .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 1.5rem; border: 1px solid #e2e8f0; }
+        .filter-select { width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 0.5rem; font-size: 0.8rem; background: white; transition: all 0.2s; }
         #loader { display: flex; background: rgba(255,255,255,0.95); backdrop-filter: blur(4px); z-index: 1000; position: fixed; inset: 0; flex-direction: column; align-items: center; justify-content: center; }
         #loader-progress { width: 300px; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden; margin-top: 1rem; }
         #loader-progress-bar { height: 100%; background: #3b82f6; width: 0%; transition: width 0.3s; }
-        .table-container { overflow-x: auto; max-height: 500px; border: 1px solid #e2e8f0; border-radius: 8px; }
-        table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
-        th { background: #f1f5f9; position: sticky; top: 0; z-index: 10; padding: 10px; text-align: left; font-weight: 600; color: #334155; border-bottom: 1px solid #cbd5e1; }
-        td { padding: 8px; border-bottom: 1px solid #e2e8f0; color: #1e293b; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        tr:hover { background: #f8fafc; }
-        .pagination { display: flex; gap: 0.5rem; justify-content: flex-end; align-items: center; margin-top: 1rem; font-size: 0.75rem; }
-        .pagination button { padding: 0.25rem 0.75rem; border: 1px solid #cbd5e1; border-radius: 4px; background: white; cursor: pointer; }
-        .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -80,74 +72,54 @@
                     <p id="data-status" class="text-blue-400 text-xs mt-1">Vinculado a Google Drive</p>
                 </div>
             </div>
-            <button onclick="exportToExcel()" class="bg-emerald-600 hover:bg-emerald-500 px-4 py-2 rounded-md font-bold text-sm transition" id="exportBtn" style="display: none;">
-                ⬇️ Exportar Reporte
-            </button>
         </div>
     </nav>
 
-    <div class="max-w-[1600px] mx-auto p-6 space-y-6">
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="card border-l-4 border-blue-600">
-                <p class="text-[10px] font-bold text-slate-400 uppercase">Total Registros</p>
-                <span id="k-total" class="text-2xl font-bold text-slate-800">0</span>
+    <div class="max-w-[1600px] mx-auto flex flex-col lg:flex-row p-6 gap-6">
+        <aside class="w-full lg:w-72 shrink-0">
+            <div class="card sticky top-24">
+                <h3 class="font-bold text-slate-800 border-b pb-3 mb-4 text-xs uppercase tracking-wider">Filtros 🔍</h3>
+                <div id="filters" class="space-y-4 max-h-[65vh] overflow-y-auto pr-2"></div>
+                <button onclick="resetFilters()" class="w-full mt-6 py-2 text-xs font-bold text-blue-600 border border-blue-600 rounded hover:bg-blue-50 transition uppercase">
+                    Limpiar Filtros
+                </button>
             </div>
-            <div class="card border-l-4 border-emerald-500">
-                <p class="text-[10px] font-bold text-slate-400 uppercase">Docentes</p>
-                <span id="k-docs" class="text-2xl font-bold text-slate-800">0</span>
-            </div>
-            <div class="card border-l-4 border-amber-500">
-                <p class="text-[10px] font-bold text-slate-400 uppercase">Planteles</p>
-                <span id="k-plant" class="text-2xl font-bold text-slate-800">0</span>
-            </div>
-            <div class="card border-l-4 border-purple-600">
-                <p class="text-[10px] font-bold text-slate-400 uppercase">Materias</p>
-                <span id="k-mat" class="text-2xl font-bold text-slate-800">0</span>
-            </div>
-        </div>
+        </aside>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="card lg:col-span-2"><div id="chart-time"></div></div>
-            <div class="card"><div id="chart-area"></div></div>
-            <div class="card"><div id="chart-estatus"></div></div>
-            <div class="card lg:col-span-2"><div id="chart-planteles-total"></div></div>
-            <div class="card lg:col-span-2"><div id="chart-top-docentes"></div></div>
-        </div>
+        <main class="flex-1 space-y-6">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="card border-l-4 border-blue-600">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">Total Registros</p>
+                    <span id="k-total" class="text-2xl font-bold text-slate-800">0</span>
+                </div>
+                <div class="card border-l-4 border-emerald-500">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">Docentes</p>
+                    <span id="k-docs" class="text-2xl font-bold text-slate-800">0</span>
+                </div>
+                <div class="card border-l-4 border-amber-500">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">Planteles</p>
+                    <span id="k-plant" class="text-2xl font-bold text-slate-800">0</span>
+                </div>
+                <div class="card border-l-4 border-purple-600">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase">Materias</p>
+                    <span id="k-mat" class="text-2xl font-bold text-slate-800">0</span>
+                </div>
+            </div>
 
-        <div class="card">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="font-bold text-slate-800 text-sm">📋 Tabla General de Registros</h3>
-                <span class="text-xs text-slate-500" id="table-count">0 registros</span>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="card lg:col-span-2"><div id="chart-time"></div></div>
+                <div class="card"><div id="chart-area"></div></div>
+                <div class="card"><div id="chart-estatus"></div></div>
+                <div class="card lg:col-span-2"><div id="chart-planteles-total"></div></div>
+                <div class="card lg:col-span-2"><div id="chart-top-docentes"></div></div>
             </div>
-            <div class="table-container">
-                <table id="data-table">
-                    <thead>
-                        <tr>
-                            <th>Plantel</th>
-                            <th>Matrícula</th>
-                            <th>Docente</th>
-                            <th>Materia</th>
-                            <th>Estatus</th>
-                            <th>Parcial</th>
-                            <th>Fecha</th>
-                            <th>Semestre Cursado</th>
-                        </tr>
-                    </thead>
-                    <tbody id="table-body"></tbody>
-                </table>
-            </div>
-            <div class="pagination">
-                <button onclick="prevPage()" id="prevPageBtn">◀ Anterior</button>
-                <span id="pageInfo">Página 1</span>
-                <button onclick="nextPage()" id="nextPageBtn">Siguiente ▶</button>
-            </div>
-        </div>
+        </main>
     </div>
 
     <script>
         let db = [];
-        let currentPage = 1;
-        const rowsPerPage = 50;
+        let filtered = [];
+        let filterState = {};
 
         const FILE_ID = '1sUn-ztr0yCDTKz7JhfRW9JcvkSukeV2f';
         const DRIVE_URL = `https://docs.google.com/spreadsheets/d/${FILE_ID}/export?format=xlsx`;
@@ -158,110 +130,113 @@
                 bar.style.width = '20%';
                 
                 const response = await fetch(DRIVE_URL);
-                if (!response.ok) throw new Error('No se pudo acceder al archivo de Drive. Asegúrese de que el archivo sea público.');
+                if (!response.ok) throw new Error('No se pudo acceder al archivo de Drive.');
 
                 bar.style.width = '50%';
                 const arrayBuffer = await response.arrayBuffer();
                 
                 bar.style.width = '70%';
-                const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                const workbook = XLSX.read(arrayBuffer, { type: 'array', cellDates: true });
                 const firstSheetName = workbook.SheetNames[0];
                 const worksheet = workbook.Sheets[firstSheetName];
                 const data = XLSX.utils.sheet_to_json(worksheet);
 
                 bar.style.width = '90%';
-                db = data.map(d => ({
-                    ...d,
-                    "Semestre Cursado": d["Semestre Cursado"] || d["Semestre2"] || d["Semestre"] || "N/A"
-                }));
+                db = data.map(d => {
+                    let o = {...d};
+                    o["Semestre Cursado"] = d["Semestre Cursado"] || d["Semestre2"] || d["Semestre"] || "N/A";
+                    return o;
+                });
 
                 if (db.length === 0) throw new Error('El archivo no contiene datos.');
 
-                renderCharts();
-                updateTable();
-                
-                document.getElementById('data-status').innerText = `✅ ${db.length.toLocaleString()} registros sincronizados.`;
-                document.getElementById('exportBtn').style.display = 'block';
+                init();
                 bar.style.width = '100%';
                 setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
 
             } catch (err) {
-                document.getElementById('loader-text').innerText = "Error de Carga";
+                console.error(err);
+                document.getElementById('loader-text').innerText = "Error de Conexión";
                 document.getElementById('loader-subtext').innerHTML = `<span class="text-red-500 font-bold">${err.message}</span>`;
             }
         });
 
+        function init() {
+            document.getElementById('data-status').innerText = `✅ ${db.length.toLocaleString()} registros sincronizados.`;
+            filtered = [...db];
+            
+            const filterKeys = ['Estatus', 'plantel', 'turno', 'parcial', 'Area', 'Semestre Cursado'];
+            const container = document.getElementById('filters');
+            
+            filterKeys.forEach(k => {
+                const vals = [...new Set(db.map(x => x[k]).filter(Boolean))].sort();
+                if(vals.length > 0) {
+                    const div = document.createElement('div');
+                    div.innerHTML = `
+                        <label class="text-[10px] font-bold text-slate-400 uppercase block mb-1">${k}</label>
+                        <select class="filter-select" onchange="applyFilter('${k}', this.value)">
+                            <option value="ALL">Todos</option>
+                            ${vals.map(v => `<option value="${v}">${v}</option>`).join('')}
+                        </select>`;
+                    container.appendChild(div);
+                }
+            });
+
+            renderCharts();
+        }
+
+        function applyFilter(key, val) {
+            if(val === "ALL") delete filterState[key];
+            else filterState[key] = val;
+            filtered = db.filter(d => Object.keys(filterState).every(k => String(d[k]) === filterState[k]));
+            renderCharts();
+        }
+
+        function resetFilters() {
+            filterState = {};
+            document.querySelectorAll('.filter-select').forEach(s => s.value = "ALL");
+            filtered = [...db];
+            renderCharts();
+        }
+
         function renderCharts() {
-            document.getElementById('k-total').innerText = db.length.toLocaleString();
-            document.getElementById('k-docs').innerText = [...new Set(db.map(x => x.matricula || x.docente))].length.toLocaleString();
-            document.getElementById('k-plant').innerText = [...new Set(db.map(x => x.plantel))].length.toLocaleString();
-            document.getElementById('k-mat').innerText = [...new Set(db.map(x => x.materia))].length.toLocaleString();
+            document.getElementById('k-total').innerText = filtered.length.toLocaleString();
+            document.getElementById('k-docs').innerText = [...new Set(filtered.map(x => x.matricula || x.docente))].length.toLocaleString();
+            document.getElementById('k-plant').innerText = [...new Set(filtered.map(x => x.plantel))].length.toLocaleString();
+            document.getElementById('k-mat').innerText = [...new Set(filtered.map(x => x.materia))].length.toLocaleString();
 
             const config = { responsive: true, displayModeBar: false };
             const baseLayout = { height: 350, font: {family: 'Inter', size: 10}, margin: {t:30, b:40, l:40, r:10} };
 
-            // Línea de tiempo
-            const timeData = countBy(db, 'fec_elaboracion');
+            const timeData = countBy(filtered, 'fec_elaboracion');
             Plotly.newPlot('chart-time', [{
                 x: Object.keys(timeData), y: Object.values(timeData),
                 type: 'scatter', mode: 'lines', fill: 'tozeroy', line: {color: '#2563eb'}
-            }], {...baseLayout, title: '<b>HISTÓRICO DE ENTREGAS</b>'}, config);
+            }], {...baseLayout, title: '<b>ENTREGAS POR FECHA</b>'}, config);
 
-            // Dona de Áreas
-            const areaData = countBy(db, 'Area');
+            const areaData = countBy(filtered, 'Area');
             Plotly.newPlot('chart-area', [{
                 labels: Object.keys(areaData), values: Object.values(areaData),
                 type: 'pie', hole: 0.4
-            }], {...baseLayout, title: '<b>DISTRIBUCIÓN POR ÁREA</b>'}, config);
+            }], {...baseLayout, title: '<b>POR ÁREA</b>'}, config);
 
-            // Estatus
-            const estData = countBy(db, 'Estatus');
+            const estData = countBy(filtered, 'Estatus');
             Plotly.newPlot('chart-estatus', [{
                 x: Object.keys(estData), y: Object.values(estData), type: 'bar', marker: {color: '#10b981'}
-            }], {...baseLayout, title: '<b>ESTATUS ACTUAL</b>'}, config);
+            }], {...baseLayout, title: '<b>ESTATUS</b>'}, config);
 
-            // Planteles
-            const pData = countBy(db, 'plantel');
+            const pData = countBy(filtered, 'plantel');
             Plotly.newPlot('chart-planteles-total', [{
                 x: Object.keys(pData), y: Object.values(pData), type: 'bar', marker: {color: '#6366f1'}
             }], {...baseLayout, title: '<b>REGISTROS POR PLANTEL</b>'}, config);
 
-            // Top Docentes
-            const dCounts = countBy(db, 'docente');
+            const dCounts = countBy(filtered, 'docente');
             const topDocs = Object.entries(dCounts).sort((a,b) => b[1]-a[1]).slice(0, 10);
             Plotly.newPlot('chart-top-docentes', [{
                 x: topDocs.map(x => x[1]), y: topDocs.map(x => x[0]),
                 type: 'bar', orientation: 'h', marker: {color: '#f59e0b'}
-            }], {...baseLayout, title: '<b>TOP 10 DOCENTES POR CARGA</b>', margin: {l:150}}, config);
+            }], {...baseLayout, title: '<b>TOP 10 DOCENTES</b>', margin: {l:150}}, config);
         }
-
-        function updateTable() {
-            const start = (currentPage - 1) * rowsPerPage;
-            const pageData = db.slice(start, start + rowsPerPage);
-            const tbody = document.getElementById('table-body');
-            
-            document.getElementById('table-count').innerText = `${db.length.toLocaleString()} registros`;
-            document.getElementById('pageInfo').innerText = `Página ${currentPage} de ${Math.ceil(db.length/rowsPerPage)}`;
-            
-            tbody.innerHTML = pageData.map(d => `
-                <tr>
-                    <td>${d.plantel || ''}</td>
-                    <td>${d.matricula || ''}</td>
-                    <td title="${d.docente}">${String(d.docente || '').substring(0,30)}</td>
-                    <td title="${d.materia}">${String(d.materia || '').substring(0,30)}</td>
-                    <td>${d.Estatus || ''}</td>
-                    <td>${d.parcial || ''}</td>
-                    <td>${d.fec_elaboracion || ''}</td>
-                    <td>${d["Semestre Cursado"] || ''}</td>
-                </tr>
-            `).join('');
-
-            document.getElementById('prevPageBtn').disabled = currentPage === 1;
-            document.getElementById('nextPageBtn').disabled = currentPage >= Math.ceil(db.length/rowsPerPage);
-        }
-
-        function nextPage() { currentPage++; updateTable(); window.scrollTo({top: document.getElementById('data-table').offsetTop - 100, behavior: 'smooth'}); }
-        function prevPage() { if(currentPage > 1) { currentPage--; updateTable(); } }
 
         function countBy(arr, key) {
             return arr.reduce((acc, obj) => {
@@ -269,13 +244,6 @@
                 acc[v] = (acc[v] || 0) + 1;
                 return acc;
             }, {});
-        }
-
-        function exportToExcel() {
-            const ws = XLSX.utils.json_to_sheet(db);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Datos_Historicos");
-            XLSX.writeFile(wb, "Reporte_Institucional_Completo.xlsx");
         }
     </script>
 </body>
